@@ -12,15 +12,20 @@ function getFile(name: string): Promise<File> {
   return delay(1500, { name, body: "...", size: 100 });
 }
 
-export async function concurrent() {
-  const file = getFile("file1.png");
+async function concurrent(limit, ps) {
+  console.log(await Promise.all([ps[0](), ps[1](), ps[2]()]));
+  console.log(await Promise.all([ps[3](), ps[4](), ps[5]()]));
+}
 
-  const result = await Promise.race([file, delay(1000, "timeout")]);
+export async function main() {
+  const files = await concurrent(3, [
+    () => getFile("file1.png"),
+    () => getFile("file2.png"),
+    () => getFile("file3.png"),
+    () => getFile("file4.png"),
+    () => getFile("file5.png"),
+    () => getFile("file6.png"),
+  ]);
 
-  if (result === "timeout") {
-    console.log("로딩");
-    console.log(await file);
-  } else {
-    console.log("로딩 없이 표시");
-  }
+  console.timeEnd();
 }
