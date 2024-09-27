@@ -9,23 +9,40 @@ interface File {
 }
 
 function getFile(name: string): Promise<File> {
+  console.log(name);
   return delay(1500, { name, body: "...", size: 100 });
 }
 
-async function concurrent(limit, ps) {
-  console.log(await Promise.all([ps[0](), ps[1](), ps[2]()]));
-  console.log(await Promise.all([ps[3](), ps[4](), ps[5]()]));
+async function concurrent<T>(limit: number, fs: (() => Promise<T>)[]) {
+  const result: T[][] = [];
+  for (let i = 0; i < fs.length / limit; i++) {
+    const tmp: Promise<T>[] = [];
+    for (let j = 0; j < limit; j++) {
+      const f = fs[limit * i + j];
+      if (f) tmp.push(f());
+    }
+
+    result.push(await Promise.all(tmp));
+  }
+
+  return result.flat();
 }
 
+async function concurrent2<T>(limit: number, fs: (() => Promise<T>)[]) {}
+
 export async function main() {
-  const files = await concurrent(3, [
+  console.time();
+  const files = await concurrent(2, [
     () => getFile("file1.png"),
     () => getFile("file2.png"),
     () => getFile("file3.png"),
     () => getFile("file4.png"),
     () => getFile("file5.png"),
     () => getFile("file6.png"),
+    () => getFile("file7.png"),
   ]);
+
+  console.log(files);
 
   console.timeEnd();
 }
