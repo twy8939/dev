@@ -28,21 +28,36 @@ async function concurrent<T>(limit: number, fs: (() => Promise<T>)[]) {
   return result.flat();
 }
 
+function* take<T>(length: number, iterable: Iterable<T>) {
+  const iterator = iterable[Symbol.iterator]();
+  while (length-- > 0) {
+    const { value, done } = iterator.next();
+    if (done) break;
+    yield value;
+  }
+}
+
 async function concurrent2<T>(limit: number, fs: (() => Promise<T>)[]) {}
 
 export async function main() {
-  console.time();
-  const files = await concurrent(2, [
-    () => getFile("file1.png"),
-    () => getFile("file2.png"),
-    () => getFile("file3.png"),
-    () => getFile("file4.png"),
-    () => getFile("file5.png"),
-    () => getFile("file6.png"),
-    () => getFile("file7.png"),
-  ]);
+  const iterable = take(3, [1, 2, 3, 4, 5, 6, 7]);
 
-  console.log(files);
+  console.log([...take(2, [1, 2, 3, 4, 5, 6, 7])]);
+  console.log([...take(10, [1, 2, 3, 4, 5, 6, 7])]);
+  console.log([...take(-2, [1, 2, 3, 4, 5, 6, 7])]);
+
+  console.time();
+  // const files = await concurrent(2, [
+  //   () => getFile("file1.png"),
+  //   () => getFile("file2.png"),
+  //   () => getFile("file3.png"),
+  //   () => getFile("file4.png"),
+  //   () => getFile("file5.png"),
+  //   () => getFile("file6.png"),
+  //   () => getFile("file7.png"),
+  // ]);
+
+  // console.log(files);
 
   console.timeEnd();
 }
