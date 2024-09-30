@@ -37,14 +37,34 @@ function* take<T>(length: number, iterable: Iterable<T>) {
   }
 }
 
+function* chunk<T>(size: number, iterable: Iterable<T>) {
+  const iterator = iterable[Symbol.iterator]();
+  while (true) {
+    const arr = [
+      ...take(size, {
+        [Symbol.iterator]() {
+          return iterator;
+        },
+      }),
+    ];
+    if (arr.length) yield arr;
+    if (arr.length < size) break;
+
+    yield "hi";
+  }
+}
+
 async function concurrent2<T>(limit: number, fs: (() => Promise<T>)[]) {}
 
 export async function main() {
-  const iterable = take(3, [1, 2, 3, 4, 5, 6, 7]);
+  const iterable = chunk(3, [1, 2, 3, 4, 5, 6, 7]);
 
-  console.log([...take(2, [1, 2, 3, 4, 5, 6, 7])]);
-  console.log([...take(10, [1, 2, 3, 4, 5, 6, 7])]);
-  console.log([...take(-2, [1, 2, 3, 4, 5, 6, 7])]);
+  console.log(iterable.next().value);
+  console.log(iterable.next().value);
+  console.log(iterable.next().value);
+  console.log(iterable.next().value);
+  console.log(iterable.next().value);
+  console.log(iterable.next().value);
 
   console.time();
   // const files = await concurrent(2, [
